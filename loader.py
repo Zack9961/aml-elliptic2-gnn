@@ -42,8 +42,8 @@ def load_data(data_path, noAgg=False):
     #df_classes.loc[df_classes['class'] == 'unknown', 'class'] = '3'
 
     # Map ccLabel in numeric value
-    df_classes.loc[df_classes['ccLabel'] == 'licit', 'ccLabel'] = '0'
-    df_classes.loc[df_classes['ccLabel'] == 'suspicious', 'ccLabel'] = '1'
+    #df_classes.loc[df_classes['ccLabel'] == 'licit', 'ccLabel'] = '0'
+    #df_classes.loc[df_classes['ccLabel'] == 'suspicious', 'ccLabel'] = '1'
 
     # Merge classes and features in one Dataframe
     df_class_feature = pd.merge(df_classes, df_features)
@@ -62,17 +62,36 @@ def load_data(data_path, noAgg=False):
     #rinomino le colonne delle etichette, ccLabel -> class
     df_class_feature = df_class_feature.rename(columns={'ccLabel': 'class'})
 
+    print("1\n" , df_class_feature)
+
+
     # Build indices for features and edge types
+    # Prendo i valori univoci di clId e class, e in ordine crescente gli vado a dare un indice 
+    # che parte da 0. Quindi avrò la chiave che sarà il clId/class e il valore composto
+    # dall'indice assegnato.
     features_idx = {name: idx for idx, name in enumerate(sorted(df_class_feature["clId"].unique()))}
     class_idx = {name: idx for idx, name in enumerate(sorted(df_class_feature["class"].unique()))}
+    print("feauture_idx:\n" , features_idx) 
+    print("class_idx:\n" , class_idx) 
+
+
+    print("2\n" , df_class_feature)
 
     # Apply index encoding to features
+    # Queste due istruzioni non fanno altro che sostituire il valore originale
+    # di clId/class con gli indici creati precedentemente
     df_class_feature["clId"] = df_class_feature["clId"].apply(lambda name: features_idx[name])
     df_class_feature["class"] = df_class_feature["class"].apply(lambda name: class_idx[name])
 
+    print("3\n" , df_class_feature)
+
     # Apply index encoding to edges
+    # Qui fa la stessa identica cosa fatta al "df_class_feature" ma la applica al
+    # "df_edges"
     df_edges["clId1"] = df_edges["clId1"].apply(lambda name: features_idx[name])
     df_edges["clId2"] = df_edges["clId2"].apply(lambda name: features_idx[name])
+
+    print("4\n" , df_class_feature)
 
     #Inverto le colonne class e clId per bellezza
     df_class_feature = df_class_feature[['clId', 'class'] + list(df_class_feature.columns[2:])]
